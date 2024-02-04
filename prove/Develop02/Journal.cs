@@ -5,34 +5,34 @@ using System.IO;
 // Journal class manages the entries and provides functionality to manipulate the journal
 class Journal
 {
+
     public List<Entry> Entries { get; private set; } = new List<Entry>();
 
-    // Add a new entry to the journal
-    public void AddEntry(string prompt, string response)
-    {
-        Entry newEntry = new Entry(prompt, response, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-        Entries.Add(newEntry);
-    }
+    public void AddEntry(string prompt, string response, Mood mood)
+{
+    Entry newEntry = new Entry(prompt, response, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), mood);
+    Entries.Add(newEntry);
+}
 
-    // Display all entries in the journal
     public void DisplayEntries()
+{
+    Console.WriteLine("\n===== Journal Entries =====");
+
+    if (Entries.Count == 0)
     {
-        Console.WriteLine("\n===== Journal Entries =====");
-
-        if (Entries.Count == 0)
-        {
-            Console.WriteLine("No entries found.\n");
-        }
-        else
-        {
-            foreach (var entry in Entries)
-            {
-                Console.WriteLine($"Date: {entry.Date}\nPrompt: {entry.Prompt}\nResponse: {entry.Response}\n");
-            }
-        }
-
-        Console.WriteLine("===========================\n");
+        Console.WriteLine("No entries found.\n");
     }
+    else
+    {
+        foreach (var entry in Entries)
+        {
+            string moodInfo = entry.EntryMood != null ? $"Mood: {entry.EntryMood.Emoji} {entry.EntryMood.MoodName}" : "Mood: Not specified";
+            Console.WriteLine($"Date: {entry.Date}\nPrompt: {entry.Prompt}\nResponse: {entry.Response}\n{moodInfo}\n");
+        }
+    }
+
+    Console.WriteLine("===========================\n");
+}
 
     // Save the journal to a file
     public void SaveToFile(string fileName)
@@ -57,29 +57,48 @@ class Journal
 
     // Load the journal from a file
     public void LoadFromFile(string fileName)
-    {
-        Entries.Clear(); // Clear existing entries before loading new ones
+{
+    Entries.Clear(); // Clear existing entries before loading new ones
 
-        try
+    try
+    {
+        using (StreamReader reader = new StreamReader(fileName))
         {
-            using (StreamReader reader = new StreamReader(fileName))
+            string line;
+            while ((line = reader.ReadLine()) != null)
             {
-                string line;
-                while ((line = reader.ReadLine()) != null)
+                string[] parts = line.Split('|'); // Use "|" as the separator
+                if (parts.Length == 4) // Check for four parts
                 {
-                    string[] parts = line.Split('|'); // Use "|" as the separator
-                    if (parts.Length == 3)
-                    {
-                        AddEntry(parts[1], parts[2]);
-                    }
+                    // Convert mood information back to Mood object
+                    Mood mood = GetMoodFromInfo(parts[3]);
+
+                    AddEntry(parts[1], parts[2], mood);
                 }
             }
+        }
 
-            Console.WriteLine("Journal loaded successfully!");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading journal: {ex.Message}");
-        }
+        Console.WriteLine("Journal loaded successfully!");
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error loading journal: {ex.Message}");
+    }
+}
+
+private Mood GetMoodFromInfo(string moodInfo)
+{
+    if (moodInfo == "Not specified")
+    {
+        return null;
+    }
+
+    string[] moodParts = moodInfo.Split(' ');
+    if (moodParts.Length == 2)
+    {
+        return new Mood(moodParts[1], moodParts[0]);
+    }
+
+    return null;
+}
 }

@@ -59,8 +59,58 @@ class UserInterface
         string randomPrompt = GetRandomPrompt();
         Console.WriteLine($"Prompt: {randomPrompt}");
         string response = GetUserInput("Response: ");
-        journal.AddEntry(randomPrompt, response);
+
+        // Mood tracking
+        Mood selectedMood = GetSelectedMood();
+        journal.AddEntry(randomPrompt, response, selectedMood);
+
+        Console.WriteLine("Entry saved successfully!");
     }
+
+    private Mood GetSelectedMood()
+    {
+        Console.WriteLine("Select your mood:");
+
+        // Assume you have a list of predefined moods
+        List<Mood> predefinedMoods = GetPredefinedMoods();
+
+        for (int i = 0; i < predefinedMoods.Count; i++)
+        {
+            Console.WriteLine($"{i + 1}. {predefinedMoods[i].Emoji} {predefinedMoods[i].MoodName}");
+        }
+
+        int selectedMoodIndex = GetNumericInput("Enter the number corresponding to your mood: ", predefinedMoods.Count) - 1;
+        return predefinedMoods[selectedMoodIndex];
+    }
+
+    private int GetNumericInput(string prompt, int maxValue)
+{
+    while (true)
+    {
+        Console.Write(prompt);
+        string input = Console.ReadLine();
+
+        if (int.TryParse(input, out int result) && result >= 1 && result <= maxValue)
+        {
+            return result;
+        }
+
+        Console.WriteLine($"Invalid input. Please enter a number between 1 and {maxValue}.\n");
+    }
+}
+
+private List<Mood> GetPredefinedMoods()
+{
+    // Define a list of predefined moods with corresponding emojis
+    return new List<Mood>
+    {
+        new Mood("Happy", "😄"),
+        new Mood("Sad", "😢"),
+        new Mood("Excited", "🎉"),
+        new Mood("Calm", "😌"),
+        // Add more moods as needed
+    };
+}
 
     private void DisplayJournal()
     {

@@ -12,3 +12,5 @@ class Program
         ui.Run();
     }
 }
+
+// I exceeded requirements by adding a mood tracker to the journal.
