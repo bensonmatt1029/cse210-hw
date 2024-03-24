@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Globalization;
 
 
 // Program class contains the entry point
